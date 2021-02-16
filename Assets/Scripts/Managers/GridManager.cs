@@ -46,7 +46,7 @@ public class GridManager : MonoSingleton<GridManager>
         {
             GameObject trailCube = CubePoolManager.Instance.RequestTrailCube();
             trailCube.transform.position = new Vector3(xCoord, 0f, zCoord);
-            allGrids[xCoord, zCoord] = GridStatus.TRAIL;
+            //allGrids[xCoord, zCoord] = GridStatus.TRAIL;
             trailCubes.Add(trailCube);
         }        
     }

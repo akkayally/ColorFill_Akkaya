@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour
     private List<Vector2> movementCoordinates;
     private List<Directions> movementDirections;
 
+    private bool isPlayerOnEmptyTile = false;
+
     private void OnEnable()
     {
         InputManager.Instance.OnSwipe += HandleSwipe;        
@@ -53,8 +55,16 @@ public class PlayerController : MonoBehaviour
         {
             movementCoordinates = new List<Vector2>();
         }
-        
-        movementCoordinates.Add(new Vector2(xCoord, zCoord));
+
+        if (GridManager.Instance.IsTileEmpty(xCoord, zCoord))
+        {
+            movementCoordinates.Add(new Vector2(xCoord, zCoord));
+            isPlayerOnEmptyTile = true;
+        }
+        else
+        {
+            isPlayerOnEmptyTile = false;
+        }
     }
 
     /// <summary>
@@ -86,7 +96,10 @@ public class PlayerController : MonoBehaviour
         {
             movementDirections = new List<Directions>();
         }
-        movementDirections.Add(movementDirection);     
+        if (isPlayerOnEmptyTile)
+        {
+            movementDirections.Add(movementDirection);
+        }        
     }
 
     private void FixedUpdate()
@@ -102,10 +115,21 @@ public class PlayerController : MonoBehaviour
         {
             StopMovement();
         }
-        //else if (other.CompareTag("Filled") && isPlayerOnEmptyTile) //Player moves from empty tile to filled one
-        //{
-        //    StopMovement();
-        //}
+        else if (other.CompareTag("Filled") && isPlayerOnEmptyTile) //Player moves from empty tile to filled one
+        {
+            StopMovement();
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        int _xCoord = Mathf.RoundToInt(transform.position.x);
+        int _zCoord = Mathf.RoundToInt(transform.position.z);
+
+        if (other.CompareTag("Filled") && GridManager.Instance.IsTileEmpty(_xCoord, _zCoord))
+        {
+            movementCoordinates.Add(new Vector2(_xCoord, _zCoord));
+            movementDirections.Add(movementDirection);
+        }
     }
 
 
@@ -127,7 +151,7 @@ public class PlayerController : MonoBehaviour
             case Directions.UP:
                 if (transform.position.z > zCoord)
                 {
-                    GridManager.Instance.CreateTrailAtPosition(xCoord, zCoord);
+                    GridManager.Instance.CreateTrailAtPosition(xCoord, zCoord);                    
                     zCoord++;
                 }
                 break;
@@ -142,8 +166,7 @@ public class PlayerController : MonoBehaviour
                 if (transform.position.x < xCoord)
                 {
                     GridManager.Instance.CreateTrailAtPosition(xCoord, zCoord);
-                    xCoord--;
-                    
+                    xCoord--;                    
                 }
                 break;
             case Directions.RIGHT:
@@ -169,12 +192,11 @@ public class PlayerController : MonoBehaviour
         movementDirection = Directions.NULL;
 
         SetXZCoordinates();
-        movementCoordinates.Add(new Vector2(xCoord, zCoord));
 
         if(movementCoordinates.Count > 0 && movementDirections.Count > 0)
         {
             FillManager.Instance.FillTiles(movementCoordinates, movementDirections);
-        }        
+        }
 
         movementCoordinates.Clear();
         movementDirections.Clear();

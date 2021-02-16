@@ -37,7 +37,7 @@ public class FillManager : MonoSingleton<FillManager>
     {
         rayDirectionVector = Vector3.zero;
 
-        if (_direction == Directions.DOWN || _direction == Directions.UP) //First movement is vertical
+        if (_direction == Directions.DOWN || _direction == Directions.UP) //the movement is vertical
         {
             if (turnPositions[0].x != turnPositions[turnPositions.Count - 1].x)
             {
@@ -46,12 +46,12 @@ public class FillManager : MonoSingleton<FillManager>
             }
             else
             {
-                float xAverage = turnPositions.Average(x => x.x) + UnityEngine.Random.Range(-0.1f, 0.1f);
+                float xAverage = turnPositions.Average(x => x.x) + Random.Range(-0.1f, 0.1f);
                 rayDirectionVector = (11 - xAverage - 1 > xAverage) ? Vector3.left : Vector3.right;
                 rayDirection = (11 - xAverage > xAverage) ? Directions.LEFT : Directions.RIGHT;
             }
         }
-        else //first movement is horizontal
+        else //the movement is horizontal
         {
             if (turnPositions[0].y != turnPositions[turnPositions.Count - 1].y)
             {
@@ -60,7 +60,7 @@ public class FillManager : MonoSingleton<FillManager>
             }
             else
             {
-                float yAverage = turnPositions.Average(x => x.y) + UnityEngine.Random.Range(-0.1f, 0.1f);
+                float yAverage = turnPositions.Average(x => x.y) + Random.Range(-0.1f, 0.1f);
                 rayDirectionVector = (11 - yAverage - 1 > yAverage) ? Vector3.back : Vector3.forward;
                 rayDirection = (11 - yAverage - 1 > yAverage) ? Directions.DOWN : Directions.UP;
             }
