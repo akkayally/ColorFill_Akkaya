@@ -5,14 +5,7 @@ using UnityEngine;
 
 public class FillManager : MonoSingleton<FillManager>
 {
-    private bool isFilledBefore = false;
-
     [SerializeField] FloatVariable moveUpDelay;
-
-    Directions rayDirection = Directions.NULL;
-    Vector3 rayDirectionVector = Vector3.zero;
-    float rayOffset = 0.5f;
-
     List<Vector2> fillXZCoordinates;
 
     /// <summary>
@@ -29,127 +22,35 @@ public class FillManager : MonoSingleton<FillManager>
     }
 
     /// <summary>
-    /// Determines the raydirection vector based on player's first movement direction
+    /// Finds the XZ coordinates of empty tiles in a closed area
     /// </summary>
-    /// <param name="_direction">first movement direction</param>
-    /// <param name="turnPositions">Each corner points in player movement list</param>
-    private void SetRayDirection(Directions _direction, List<Vector2> turnPositions)
+    /// <param name="tilePosXZ">An empty tile's XZ coordinates</param>
+    /// <returns>The list of all the empty tiles' XZ coordinates</returns>
+    private List<Vector2> FloodFill(Vector2 tilePosXZ)
     {
-        rayDirectionVector = Vector3.zero;
+        List<Vector2> fillCoordinates = new List<Vector2>();
+        Stack<Vector2> tiles = new Stack<Vector2>();
 
-        if (_direction == Directions.DOWN || _direction == Directions.UP) //the movement is vertical
-        {
-            if (turnPositions[0].x != turnPositions[turnPositions.Count - 1].x)
-            {
-                rayDirectionVector = (turnPositions[0].x < turnPositions[turnPositions.Count - 1].x) ? Vector3.right : Vector3.left;
-                rayDirection = (turnPositions[0].x < turnPositions[turnPositions.Count - 1].x) ? Directions.RIGHT : Directions.LEFT;
-            }
-            else
-            {
-                float xAverage = turnPositions.Average(x => x.x) + Random.Range(-0.1f, 0.1f);
-                rayDirectionVector = (11 - xAverage - 1 > xAverage) ? Vector3.left : Vector3.right;
-                rayDirection = (11 - xAverage > xAverage) ? Directions.LEFT : Directions.RIGHT;
-            }
-        }
-        else //the movement is horizontal
-        {
-            if (turnPositions[0].y != turnPositions[turnPositions.Count - 1].y)
-            {
-                rayDirectionVector = (turnPositions[0].y < turnPositions[turnPositions.Count - 1].y) ? Vector3.forward : Vector3.back;
-                rayDirection = (turnPositions[0].y < turnPositions[turnPositions.Count - 1].y) ? Directions.UP : Directions.DOWN;
-            }
-            else
-            {
-                float yAverage = turnPositions.Average(x => x.y) + Random.Range(-0.1f, 0.1f);
-                rayDirectionVector = (11 - yAverage - 1 > yAverage) ? Vector3.back : Vector3.forward;
-                rayDirection = (11 - yAverage - 1 > yAverage) ? Directions.DOWN : Directions.UP;
-            }
-        }
-    }
+        tiles.Push(tilePosXZ);
 
-    /// <summary>
-    /// Finds possible grid coordinates to fill along a movement direction
-    /// </summary>
-    /// <param name="_moveDirection">player movement direction</param>
-    /// <param name="moveStartPos">position of the first grid on given path</param>
-    /// <param name="moveEndPos">position of the last grid on given path</param>
-    private void AddFillCoordinatesOnMovePath(Directions _moveDirection, Vector2 moveStartPos, Vector2 moveEndPos)
-    {
-        if (rayDirectionVector != Vector3.zero && _moveDirection != Directions.NULL)
+        while (tiles.Count > 0)
         {
-            Vector3 rayEndPos = Vector3.zero;
-            Vector3 rayStartPos = new Vector3(moveStartPos.x, 0.1f, moveStartPos.y) + (rayDirectionVector * rayOffset);
-
-            if (_moveDirection == Directions.UP || _moveDirection == Directions.DOWN) //Vertical movment
+            Vector2 _temp = tiles.Pop();
+            if (_temp.x >= 0 && _temp.x < 11 && _temp.y >= 0 && _temp.y < 11)
             {
-                for (int i = 0; i <= Mathf.Abs(moveEndPos.y - moveStartPos.y); i++)
+                if (GridManager.Instance.allGrids[(int)_temp.x, (int)_temp.y] == GridStatus.EMPTY)
                 {
-                    rayEndPos = CastRay(rayStartPos);
-                    for (int j = 0; j < Mathf.Abs(rayEndPos.x - moveStartPos.x) - 1; j++)
-                    {
-                        float xCoordinate, zCoordinate;
+                    GridManager.Instance.allGrids[(int)_temp.x, (int)_temp.y] = GridStatus.TRAIL;
+                    fillCoordinates.Add(new Vector2(_temp.x, _temp.y));
 
-                        if (moveEndPos.y > moveStartPos.y) //Up
-                        {
-                            xCoordinate = moveStartPos.x + rayDirectionVector.x * (j + 1);
-                            zCoordinate = moveStartPos.y + i + rayDirectionVector.z;
-
-                        }
-                        else // Down
-                        {
-                            xCoordinate = moveStartPos.x + rayDirectionVector.x * (j + 1);
-                            zCoordinate = moveStartPos.y - i - rayDirectionVector.z;
-                        }
-                        fillXZCoordinates.Add(new Vector2(xCoordinate, zCoordinate));
-                    }
-                    rayStartPos += (moveEndPos.y > moveStartPos.y) ? Vector3.forward : Vector3.back;
-                }
-            }
-            else
-            {
-                for (int i = 0; i <= Mathf.Abs(moveEndPos.x - moveStartPos.x); i++) //Horizontal movement
-                {
-                    rayEndPos = CastRay(rayStartPos);
-                    for (int j = 0; j < Mathf.Abs(rayEndPos.z - moveStartPos.y) - 1; j++)
-                    {
-                        float xCoordinate, zCoordinate;
-
-                        if (moveEndPos.x > moveStartPos.x) //Right
-                        {
-                            xCoordinate = moveStartPos.x + i + rayDirectionVector.x;
-                            zCoordinate = moveStartPos.y + rayDirectionVector.z * (j + 1);
-                        }
-                        else //left
-                        {
-                            xCoordinate = moveStartPos.x - i - rayDirectionVector.x;
-                            zCoordinate = moveStartPos.y + rayDirectionVector.z * (j + 1);
-                        }
-                        fillXZCoordinates.Add(new Vector2(xCoordinate, zCoordinate));
-                    }
-                    rayStartPos += (moveEndPos.x > moveStartPos.x) ? Vector3.right : Vector3.left;
+                    tiles.Push(new Vector2(_temp.x - 1, _temp.y));
+                    tiles.Push(new Vector2(_temp.x + 1, _temp.y));
+                    tiles.Push(new Vector2(_temp.x, _temp.y - 1));
+                    tiles.Push(new Vector2(_temp.x, _temp.y + 1));
                 }
             }
         }
-    }
-
-    /// <summary>
-    /// Casts a ray to find end point of a row/column
-    /// </summary>
-    /// <param name="startPos">Ray start position</param>
-    /// <returns>The position of hit object(a wall or a trail cube)</returns>
-    private Vector3 CastRay(Vector3 startPos)
-    {
-        Vector3 _hitPosition = Vector3.zero;
-
-        RaycastHit hit;
-        if (Physics.Raycast(startPos, rayDirectionVector, out hit, 11f, LayerMask.GetMask("Cube")))
-        {
-            if (hit.collider.CompareTag("Wall") || hit.collider.CompareTag("Trail") || hit.collider.CompareTag("Filled"))
-            {
-                _hitPosition = hit.transform.position;
-            }
-        }
-        return _hitPosition;
+        return fillCoordinates;
     }
 
     /// <summary>
@@ -157,66 +58,123 @@ public class FillManager : MonoSingleton<FillManager>
     /// </summary>
     private IEnumerator CreateCubes()
     {
-        foreach (Vector2 xzCoordinate in fillXZCoordinates)
+        if(fillXZCoordinates.Count > 0)
         {
-            int _xCoordinate = (int)xzCoordinate.x;
-            int _zCoordinate = (int)xzCoordinate.y;
-            GridManager.Instance.CreateTrailAtPosition(_xCoordinate, _zCoordinate);
+            foreach (Vector2 xzCoordinate in fillXZCoordinates)
+            {
+                int _xCoordinate = (int)xzCoordinate.x;
+                int _zCoordinate = (int)xzCoordinate.y;
+                GridManager.Instance.CreateTrailAtPosition(_xCoordinate, _zCoordinate);
+            }
         }
+        
         yield return new WaitForSeconds(moveUpDelay.Value);
         GridManager.Instance.MoveTrailCubesUp();
+
         yield return null;
-        if (GridManager.Instance.CheckEmptyTileLeft())
-        {
-            Debug.Log("Level Completed!");
-            isFilledBefore = false;
-        }
-        isFilledBefore = true;
     }
 
-
     /// <summary>
-    /// Based on player movement data fills the grid
+    /// Finds if trail cubes has two empty tiles as neighbour
     /// </summary>
-    /// <param name="turnPositions">List of corner points of player movement</param>
-    /// <param name="moveDirections">List of movement directions</param>
-    public void FillTiles(List<Vector2> turnPositions, List<Directions> moveDirections)
-      {
-        ResetFillXZCoordinates();
+    /// <param name="xzCoord">XZ coordiantes of a trail cube</param>
+    /// <param name="moveDirection">Trail cubes' current movement direction</param>
+    /// <returns>List of XZ coordinates of empty neighbours</returns>
+    private List<Vector2> GetEmptyNeighbours(Vector2 xzCoord, Directions moveDirection)
+    {
+        List<Vector2> neighboursAtSides = new List<Vector2>();
+        int xCoord = (int)xzCoord.x;
+        int zCoord = (int)xzCoord.y;
 
-        SetRayDirection(moveDirections[1], turnPositions);
-
-
-        if (isFilledBefore && moveDirections.Count > 1)
+        if (moveDirection == Directions.UP || moveDirection == Directions.DOWN)
         {
-            SetRayDirection(moveDirections[1], turnPositions);
+            if(xzCoord.x > 0 && xzCoord.x < 11 - 1)
+            {
+                if(GridManager.Instance.IsTileEmpty(xCoord -1, zCoord) && GridManager.Instance.IsTileEmpty(xCoord + 1, zCoord))
+                {
+                    neighboursAtSides.Add(new Vector2(xCoord - 1, zCoord));
+                    neighboursAtSides.Add(new Vector2(xCoord + 1, zCoord));
+                }
+            }
         }
         else
         {
-            SetRayDirection(moveDirections[0], turnPositions);
-        }
-
-        for (int i = 0; i < moveDirections.Count; i++)
-        {
-            if (!isFilledBefore)
+            if(xzCoord.y > 0 && xzCoord.y < 11 - 1)
             {
-                if (moveDirections[i] == moveDirections[0])
+                if(GridManager.Instance.IsTileEmpty(xCoord, zCoord + 1) && GridManager.Instance.IsTileEmpty(xCoord, zCoord - 1))
                 {
-                    AddFillCoordinatesOnMovePath(moveDirections[i], turnPositions[i], turnPositions[i + 1]);
+                    neighboursAtSides.Add(new Vector2(xCoord, zCoord + 1));
+                    neighboursAtSides.Add(new Vector2(xCoord, zCoord - 1));
                 }
+            }
+        }
+        return neighboursAtSides;
+    }
+
+    /// <summary>
+    /// Gets two tiles' position on opposite sides of user's trail
+    /// Calculates the area covered at each side
+    /// Add each tile in the smaller area in fill list
+    /// </summary>
+    /// <param name="emptyNeighbourCoordinates">XZ coordinates of two tiles on opposite sides of a trail cube</param>
+    private void SetSmallArea(List<Vector2> emptyNeighbourCoordinates)
+    {
+        List<Vector2> tileGroup1 = FloodFill(emptyNeighbourCoordinates[0]);
+        List<Vector2> tileGroup2 = FloodFill(emptyNeighbourCoordinates[1]);
+
+        if(tileGroup1.Count > 0 && tileGroup2.Count > 0)
+        {
+            if(tileGroup1.Count == tileGroup2.Count)
+            {
+                AddToFillCoordinates(tileGroup1);
+            }
+            else if(tileGroup1.Count < tileGroup2.Count)
+            {
+                AddToFillCoordinates(tileGroup1);
             }
             else
             {
-                if (moveDirections[i] == moveDirections[1])
-                {
-                    AddFillCoordinatesOnMovePath(moveDirections[i], turnPositions[i], turnPositions[i + 1]);
-                }
+                AddToFillCoordinates(tileGroup2);
+            }
+
+            GridManager.Instance.EmptyTileGroup(tileGroup1); //Resetting tile statuses to empty before actually filling it
+            GridManager.Instance.EmptyTileGroup(tileGroup2); //Resetting tile statuses to empty before actually filling it
+        }
+    }
+
+    /// <summary>
+    /// Adds each tile's xz coordinates to list
+    /// </summary>
+    /// <param name="tilesToAdd">List of XZ coordinates of empty tiles</param>
+    private void AddToFillCoordinates(List<Vector2> tilesToAdd)
+    {
+        foreach(Vector2 tilePos in tilesToAdd)
+        {
+            fillXZCoordinates.Add(tilePos);
+        }
+    }
+
+    /// <summary>
+    /// Fills the smallest area based on user's trail
+    /// </summary>
+    /// <param name="trailPosAndDirections">Player's each movements coordinates and the movement direction pair</param>
+    public void FillTiles(Dictionary<Vector2, Directions> trailPosAndDirections)
+      {
+        ResetFillXZCoordinates();
+
+        Vector2 neighbour1 = Vector2.zero;
+        Vector2 neighbour2 = Vector2.zero;
+
+        foreach(KeyValuePair<Vector2, Directions> _trailPosDirection in trailPosAndDirections)
+        {
+            List<Vector2> emptyNeighbourCoordinates = GetEmptyNeighbours(_trailPosDirection.Key, _trailPosDirection.Value);
+
+            if(emptyNeighbourCoordinates.Count == 2) // Both neighbours on sides are empty
+            {
+                SetSmallArea(emptyNeighbourCoordinates);
+                    break;
             }
         }
-
-        if (fillXZCoordinates.Count > 0)
-        {
-            StartCoroutine("CreateCubes");
-        }
+        StartCoroutine("CreateCubes");
     }
 }

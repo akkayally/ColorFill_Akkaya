@@ -6,6 +6,8 @@ using UnityEngine;
 using DG.Tweening;
 public class GridManager : MonoSingleton<GridManager>
 {
+    [SerializeField] GameEvent OnLevelComplete;
+
     List<GameObject> trailCubes = new List<GameObject>();
 
     public GridStatus[,] allGrids;
@@ -40,20 +42,33 @@ public class GridManager : MonoSingleton<GridManager>
         }
     }
 
-    public void CreateTrailAtPosition(int xCoord, int zCoord)
+    public bool CreateTrailAtPosition(int xCoord, int zCoord)
     {
-        if(allGrids[xCoord, zCoord] == GridStatus.EMPTY)
+        if (allGrids[xCoord, zCoord] == GridStatus.EMPTY)
         {
             GameObject trailCube = CubePoolManager.Instance.RequestTrailCube();
             trailCube.transform.position = new Vector3(xCoord, 0f, zCoord);
-            //allGrids[xCoord, zCoord] = GridStatus.TRAIL;
+            allGrids[xCoord, zCoord] = GridStatus.TRAIL;
             trailCubes.Add(trailCube);
-        }        
+            return true;
+        }
+        return false;
     }
 
     public bool IsTileEmpty(int xCoordinate, int zCoordinate)
     {
         return allGrids[xCoordinate, zCoordinate] == GridStatus.EMPTY;
+    }
+
+    public void EmptyTileGroup(List<Vector2> tileGroup)
+    {
+        foreach(Vector2 tilePos in tileGroup)
+        {
+            int xCoord = (int)tilePos.x;
+            int zCoord = (int)tilePos.y;
+
+            allGrids[xCoord, zCoord] = GridStatus.EMPTY;
+        }
     }
 
     public bool CheckEmptyTileLeft()
@@ -71,5 +86,10 @@ public class GridManager : MonoSingleton<GridManager>
             allGrids[(int)cubePosition.x, (int)cubePosition.z] = GridStatus.FILLED;
         }
         trailCubes.Clear();
+
+        if (CheckEmptyTileLeft())
+        {
+            OnLevelComplete.Raise();
+        }
     }
 }

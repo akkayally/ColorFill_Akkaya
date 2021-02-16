@@ -1014,10 +1014,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 765145234738390041, guid: 1b7f770ae3ea5f241ab76c5c05891927, type: 3}
-      propertyPath: cubePrefab
-      value: 
-      objectReference: {fileID: 4033167170617629075, guid: ba37812f8ea2c2540a8609d862f292c8, type: 3}
     - target: {fileID: 5102406143970886709, guid: 1b7f770ae3ea5f241ab76c5c05891927, type: 3}
       propertyPath: m_Name
       value: Player

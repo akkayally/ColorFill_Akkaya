@@ -2,10 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
+    [SerializeField] GameEvent OnGameOver;
+
     Rigidbody playerRb;
 
     private bool isMoving = false;
@@ -15,9 +18,7 @@ public class PlayerController : MonoBehaviour
 
     private int xCoord, zCoord;
 
-    private List<Vector2> movementCoordinates;
-    private List<Directions> movementDirections;
-
+    Dictionary<Vector2, Directions> trailPositionDirection;
     private bool isPlayerOnEmptyTile = false;
 
     private void OnEnable()
@@ -50,21 +51,6 @@ public class PlayerController : MonoBehaviour
     {
         xCoord = Mathf.RoundToInt(transform.position.x);
         zCoord = Mathf.RoundToInt(transform.position.z);
-
-        if (movementCoordinates == null)
-        {
-            movementCoordinates = new List<Vector2>();
-        }
-
-        if (GridManager.Instance.IsTileEmpty(xCoord, zCoord))
-        {
-            movementCoordinates.Add(new Vector2(xCoord, zCoord));
-            isPlayerOnEmptyTile = true;
-        }
-        else
-        {
-            isPlayerOnEmptyTile = false;
-        }
     }
 
     /// <summary>
@@ -89,17 +75,12 @@ public class PlayerController : MonoBehaviour
                 break;
         }
         movementDirection = direction;
-        
-        isMoving = true;
 
-        if(movementDirections == null)
+        if(trailPositionDirection == null)
         {
-            movementDirections = new List<Directions>();
+            trailPositionDirection = new Dictionary<Vector2, Directions>();
         }
-        if (isPlayerOnEmptyTile)
-        {
-            movementDirections.Add(movementDirection);
-        }        
+        isMoving = true;
     }
 
     private void FixedUpdate()
@@ -109,29 +90,25 @@ public class PlayerController : MonoBehaviour
         CheckTrail();
     }
 
+    #region CollisionDetection
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Wall"))
+        if (other.CompareTag("Enemy"))
+        {
+            Debug.Log("Player hit enemy: Game over!");
+            OnGameOver.Raise();
+        }
+        else if (other.CompareTag("Wall"))
         {
             StopMovement();
+            FillArea();
         }
         else if (other.CompareTag("Filled") && isPlayerOnEmptyTile) //Player moves from empty tile to filled one
         {
-            StopMovement();
+            FillArea();
         }
     }
-    private void OnTriggerExit(Collider other)
-    {
-        int _xCoord = Mathf.RoundToInt(transform.position.x);
-        int _zCoord = Mathf.RoundToInt(transform.position.z);
-
-        if (other.CompareTag("Filled") && GridManager.Instance.IsTileEmpty(_xCoord, _zCoord))
-        {
-            movementCoordinates.Add(new Vector2(_xCoord, _zCoord));
-            movementDirections.Add(movementDirection);
-        }
-    }
-
+    #endregion
 
     /// <summary>
     /// Moves the cube on a direction
@@ -151,28 +128,28 @@ public class PlayerController : MonoBehaviour
             case Directions.UP:
                 if (transform.position.z > zCoord)
                 {
-                    GridManager.Instance.CreateTrailAtPosition(xCoord, zCoord);                    
+                    TryCreatingTrailCube();
                     zCoord++;
                 }
                 break;
             case Directions.DOWN:
                 if (transform.position.z < zCoord)
                 {
-                    GridManager.Instance.CreateTrailAtPosition(xCoord, zCoord);
+                    TryCreatingTrailCube();
                     zCoord--;                    
                 }
                 break;
             case Directions.LEFT:
                 if (transform.position.x < xCoord)
                 {
-                    GridManager.Instance.CreateTrailAtPosition(xCoord, zCoord);
+                    TryCreatingTrailCube();
                     xCoord--;                    
                 }
                 break;
             case Directions.RIGHT:
                 if (transform.position.x > xCoord)
                 {
-                    GridManager.Instance.CreateTrailAtPosition(xCoord, zCoord);
+                    TryCreatingTrailCube();
                     xCoord++;                    
                 }
                 break;
@@ -184,21 +161,47 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void StopMovement()
+    private void TryCreatingTrailCube()
+    {
+        if (GridManager.Instance.CreateTrailAtPosition(xCoord, zCoord))
+        {
+            isPlayerOnEmptyTile = true;
+            trailPositionDirection.Add(new Vector2(xCoord, zCoord), movementDirection);
+        }
+    }
+
+    private void FillArea()
+    {
+        SetXZCoordinates();
+
+        if (trailPositionDirection.Count > 0)
+        {
+            FillManager.Instance.FillTiles(trailPositionDirection);
+        }
+
+        isPlayerOnEmptyTile = false;
+        trailPositionDirection.Clear();
+        movementDirection = Directions.NULL;
+    }
+
+    private void StopMovement()
     {
         AdjustPosition();
         isMoving = false;
         playerRb.velocity = Vector3.zero;
-        movementDirection = Directions.NULL;
+    }
 
-        SetXZCoordinates();
+    private IEnumerator LevelEndAnimation()
+    {
+        transform.DOMoveX(5f, 1f);
+        yield return new WaitForSeconds(1.5f);
 
-        if(movementCoordinates.Count > 0 && movementDirections.Count > 0)
-        {
-            FillManager.Instance.FillTiles(movementCoordinates, movementDirections);
-        }
+        transform.DOMoveZ(11f + 2f, 1f);
+    }
 
-        movementCoordinates.Clear();
-        movementDirections.Clear();
+    public void HandleLevelComplete()
+    {
+        StopMovement();
+        StartCoroutine("LevelEndAnimation");
     }
 }
