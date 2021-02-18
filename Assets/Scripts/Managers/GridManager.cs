@@ -12,16 +12,42 @@ public class GridManager : MonoSingleton<GridManager>
 
     public GridStatus[,] allGrids;
 
-    private void Start()
+    private int columnSize, rowSize;
+    private int totalGridCount = 0;
+
+    private void OnEnable()
     {
-        GenerateGrid(11, 11);
+        LevelManager.Instance.OnLevelCreated += SetGridSize;
     }
+
+    private void SetGridSize(Vector2 _gridSize, List<Vector2> obstacleCoordinates)
+    {
+        columnSize = (int)_gridSize.x;
+        rowSize = (int)_gridSize.y;
+
+        GenerateGrid(columnSize, rowSize);
+        SetObstaclePositions(obstacleCoordinates);
+
+        totalGridCount = columnSize * rowSize - obstacleCoordinates.Count;
+    }
+
+    private void SetObstaclePositions(List<Vector2> obstacleCoordinates)
+    {
+        foreach(Vector2 xzCoordinates in obstacleCoordinates)
+        {
+            int _xCoord = (int)xzCoordinates.x;
+            int _zCoord = (int)xzCoordinates.y;
+
+            allGrids[_xCoord, _zCoord] = GridStatus.WALL;
+        }
+    }
+
     private int GetFilledGridCount()
     {
         int fillCount = 0;
-        for (int i = 0; i < 11; i++)
+        for (int i = 0; i < columnSize; i++)
         {
-            for (int j = 0; j < 11; j++)
+            for (int j = 0; j < rowSize; j++)
             {
                 fillCount += (allGrids[i, j] == GridStatus.FILLED) ? 1 : 0;
             }
@@ -60,6 +86,21 @@ public class GridManager : MonoSingleton<GridManager>
         return allGrids[xCoordinate, zCoordinate] == GridStatus.EMPTY;
     }
 
+    public List<Vector2> GetEmptyTilesCoordinates()
+    {
+        List<Vector2> emptyTiles = new List<Vector2>();
+
+        for(int i = 0; i< columnSize; i++)
+        {
+            for(int j = 0; j<rowSize; j++)
+            {
+                if (allGrids[i, j] == GridStatus.EMPTY)
+                    emptyTiles.Add(new Vector2(i,j));
+            }
+        }
+        return emptyTiles;
+    }
+
     public void EmptyTileGroup(List<Vector2> tileGroup)
     {
         foreach(Vector2 tilePos in tileGroup)
@@ -73,7 +114,7 @@ public class GridManager : MonoSingleton<GridManager>
 
     public bool CheckEmptyTileLeft()
     {
-        return GetFilledGridCount() == (11 * 11);
+        return GetFilledGridCount() == totalGridCount;
     }
 
     public void MoveTrailCubesUp()

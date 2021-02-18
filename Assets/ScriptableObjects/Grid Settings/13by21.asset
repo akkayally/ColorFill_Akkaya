@@ -9,11 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c2ac95396a71844aa8ef40faf6403d0, type: 3}
-  m_Name: Level1
+  m_Script: {fileID: 11500000, guid: 5e3aabda51fb3344eb43cddd3c5435d6, type: 3}
+  m_Name: 13by21
   m_EditorClassIdentifier: 
-  gridSettings: {fileID: 11400000, guid: f53e387ca57d3cb42b64b5915df3a0f6, type: 2}
-  obstacle: {fileID: 0}
-  obstaclePositions: []
-  enemy: {fileID: 0}
-  enemyPositionXZ: {x: 0, y: 0}
+  DeveloperDescription: 
+  _columnSize: 13
+  _rowSize: 21

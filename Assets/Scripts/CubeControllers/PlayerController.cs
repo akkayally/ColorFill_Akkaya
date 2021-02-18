@@ -18,18 +18,32 @@ public class PlayerController : MonoBehaviour
 
     private int xCoord, zCoord;
 
+    private int gridColumnCount, gridRowCount;
+
     Dictionary<Vector2, Directions> trailPositionDirection;
     private bool isPlayerOnEmptyTile = false;
 
     private void OnEnable()
     {
-        InputManager.Instance.OnSwipe += HandleSwipe;        
+        InputManager.Instance.OnSwipe += HandleSwipe;
+        LevelManager.Instance.OnLevelCreated += AdjustInitialPosition;
         playerRb = GetComponent<Rigidbody>();
     }
 
     private void OnDisable()
     {
-        InputManager.Instance.OnSwipe -= HandleSwipe;
+        LevelManager.Instance.OnLevelCreated -= AdjustInitialPosition;
+        InputManager.Instance.OnSwipe -= HandleSwipe;        
+    }
+
+    private void AdjustInitialPosition(Vector2 gridSize, List<Vector2> obstacleCoordiantes)
+    {
+        float _xPosition = ((int)gridSize.x - 1) / 2;
+
+        transform.position = new Vector3(_xPosition, 0.5f, 0f);
+
+        gridColumnCount = (int)gridSize.x;
+        gridRowCount = (int)gridSize.y;
     }
 
     private void HandleSwipe(Directions _direction)
@@ -93,12 +107,7 @@ public class PlayerController : MonoBehaviour
     #region CollisionDetection
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Enemy"))
-        {
-            Debug.Log("Player hit enemy: Game over!");
-            OnGameOver.Raise();
-        }
-        else if (other.CompareTag("Wall"))
+        if (other.CompareTag("Wall"))
         {
             StopMovement();
             FillArea();
@@ -106,6 +115,11 @@ public class PlayerController : MonoBehaviour
         else if (other.CompareTag("Filled") && isPlayerOnEmptyTile) //Player moves from empty tile to filled one
         {
             FillArea();
+        }
+        else if (other.CompareTag("Obstacle"))
+        {
+            StopMovement();
+            GridManager.Instance.MoveTrailCubesUp();
         }
     }
     #endregion
@@ -184,6 +198,7 @@ public class PlayerController : MonoBehaviour
         movementDirection = Directions.NULL;
     }
 
+
     private void StopMovement()
     {
         AdjustPosition();
@@ -193,10 +208,10 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator LevelEndAnimation()
     {
-        transform.DOMoveX(5f, 1f);
+        transform.DOMoveX((gridColumnCount - 1) / 2, 1f);
         yield return new WaitForSeconds(1.5f);
 
-        transform.DOMoveZ(11f + 2f, 1f);
+        transform.DOMoveZ(gridRowCount + 2f, 1f);
     }
 
     public void HandleLevelComplete()

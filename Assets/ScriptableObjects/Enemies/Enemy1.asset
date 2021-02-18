@@ -12,13 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b231568e32e198b498e21191ed51a65b, type: 3}
   m_Name: Enemy1
   m_EditorClassIdentifier: 
-  movementDirection: 0
-  moveSpeed:
-    UseConstant: 1
-    ConstantValue: 0
-    Variable: {fileID: 0}
-  prefab: {fileID: 0}
-  MoveSpeed:
-    UseConstant: 1
-    ConstantValue: 0
-    Variable: {fileID: 0}
+  movementDirection: 1
+  moveSpeed: 1.75
+  prefab: {fileID: 2328096014167011062, guid: 07f9d65b7dfeb5b47a57d4ba6537f047, type: 3}
+  moveDistance: 3

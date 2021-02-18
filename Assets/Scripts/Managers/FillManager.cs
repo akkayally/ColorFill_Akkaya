@@ -1,12 +1,27 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class FillManager : MonoSingleton<FillManager>
 {
-    [SerializeField] FloatVariable moveUpDelay;
-    List<Vector2> fillXZCoordinates;
+    [SerializeField] FloatVariable moveUpDelay; //Delay time for moving filled tiles up (in seconds)
+    List<Vector2> fillXZCoordinates; //List of XZ coordinates of tiles to fill
+
+    private int gridColumSize, gridRowSize;
+
+    private void OnEnable()
+    {
+        LevelManager.Instance.OnLevelCreated += SetGridData;
+    }
+
+    private void SetGridData(Vector2 gridSize, List<Vector2> obstacleCoordiantes)
+    {
+        gridColumSize = (int)gridSize.x;
+        gridRowSize = (int)gridSize.y;
+    }
+
 
     /// <summary>
     /// Creates or clears the fill coordinates
@@ -36,7 +51,7 @@ public class FillManager : MonoSingleton<FillManager>
         while (tiles.Count > 0)
         {
             Vector2 _temp = tiles.Pop();
-            if (_temp.x >= 0 && _temp.x < 11 && _temp.y >= 0 && _temp.y < 11)
+            if (_temp.x >= 0 && _temp.x < gridColumSize && _temp.y >= 0 && _temp.y < gridRowSize)
             {
                 if (GridManager.Instance.allGrids[(int)_temp.x, (int)_temp.y] == GridStatus.EMPTY)
                 {
@@ -88,7 +103,7 @@ public class FillManager : MonoSingleton<FillManager>
 
         if (moveDirection == Directions.UP || moveDirection == Directions.DOWN)
         {
-            if(xzCoord.x > 0 && xzCoord.x < 11 - 1)
+            if(xzCoord.x > 0 && xzCoord.x < gridColumSize - 1)
             {
                 if(GridManager.Instance.IsTileEmpty(xCoord -1, zCoord) && GridManager.Instance.IsTileEmpty(xCoord + 1, zCoord))
                 {
@@ -99,7 +114,7 @@ public class FillManager : MonoSingleton<FillManager>
         }
         else
         {
-            if(xzCoord.y > 0 && xzCoord.y < 11 - 1)
+            if(xzCoord.y > 0 && xzCoord.y < gridRowSize - 1)
             {
                 if(GridManager.Instance.IsTileEmpty(xCoord, zCoord + 1) && GridManager.Instance.IsTileEmpty(xCoord, zCoord - 1))
                 {
@@ -135,6 +150,12 @@ public class FillManager : MonoSingleton<FillManager>
             else
             {
                 AddToFillCoordinates(tileGroup2);
+            }
+
+            //Checking if any empty tile left apart from the tiles in the two tile group selected
+            if(GridManager.Instance.GetEmptyTilesCoordinates().Count > 0)
+            {
+                AddToFillCoordinates(GridManager.Instance.GetEmptyTilesCoordinates());
             }
 
             GridManager.Instance.EmptyTileGroup(tileGroup1); //Resetting tile statuses to empty before actually filling it

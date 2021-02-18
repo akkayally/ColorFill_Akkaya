@@ -5,17 +5,13 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Enemy Settings", fileName = "New Enemy Setting")]
 public class EnemySettings : ScriptableObject
 {
-    public enum MovementAxis
-    {
-       NaN,
-       HORIZONTAL,
-       VERTICAL
-    }
-
     [SerializeField] MovementAxis movementDirection;
-    [SerializeField] FloatReference moveSpeed;
+    [SerializeField] float moveSpeed;
     [SerializeField] GameObject prefab;
+    [SerializeField] int moveDistance;
+
     public MovementAxis MovementDirection => movementDirection;
     public GameObject Prefab => prefab;
-    public FloatReference MoveSpeed;
+    public float MoveSpeed => moveSpeed;
+    public int MoveDistance => moveDistance;
 }

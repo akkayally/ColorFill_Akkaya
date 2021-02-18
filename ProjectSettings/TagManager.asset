@@ -8,6 +8,7 @@ TagManager:
   - Trail
   - Filled
   - Enemy
+  - Obstacle
   layers:
   - Default
   - TransparentFX

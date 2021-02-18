@@ -6,3 +6,10 @@
     UP,
     DOWN
 }
+
+public enum MovementAxis
+{
+    NaN,
+    HORIZONTAL,
+    VERTICAL
+}
