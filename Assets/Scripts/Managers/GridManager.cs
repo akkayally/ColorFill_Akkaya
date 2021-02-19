@@ -18,6 +18,12 @@ public class GridManager : MonoSingleton<GridManager>
     private void OnEnable()
     {
         LevelManager.Instance.OnLevelCreated += SetGridSize;
+        GameManager.Instance.OnGameStateChange.AddListener(HandleGameStateChanged);
+    }
+
+    private void OnDisable()
+    {
+        GameManager.Instance.OnGameStateChange.RemoveListener(HandleGameStateChanged);
     }
 
     private void SetGridSize(Vector2 _gridSize, List<Vector2> obstacleCoordinates)
@@ -29,6 +35,15 @@ public class GridManager : MonoSingleton<GridManager>
         SetObstaclePositions(obstacleCoordinates);
 
         totalGridCount = columnSize * rowSize - obstacleCoordinates.Count;
+    }
+
+    private void HandleGameStateChanged(GameManager.GameState currentState, GameManager.GameState prevState)
+    {
+        if (prevState == GameManager.GameState.GAME_OVER && currentState == GameManager.GameState.MENU)
+        {
+            allGrids = null;
+            totalGridCount = 0;
+        }
     }
 
     private void SetObstaclePositions(List<Vector2> obstacleCoordinates)
@@ -68,11 +83,12 @@ public class GridManager : MonoSingleton<GridManager>
         }
     }
 
-    public bool CreateTrailAtPosition(int xCoord, int zCoord)
+    public bool CreateTrailAtPosition(int xCoord, int zCoord, bool isTrail)
     {
         if (allGrids[xCoord, zCoord] == GridStatus.EMPTY)
         {
             GameObject trailCube = CubePoolManager.Instance.RequestTrailCube();
+            trailCube.tag = (isTrail) ? "Trail" : "Filled";
             trailCube.transform.position = new Vector3(xCoord, 0f, zCoord);
             allGrids[xCoord, zCoord] = GridStatus.TRAIL;
             trailCubes.Add(trailCube);
@@ -126,11 +142,15 @@ public class GridManager : MonoSingleton<GridManager>
             Vector3 cubePosition = trailCube.transform.position;
             allGrids[(int)cubePosition.x, (int)cubePosition.z] = GridStatus.FILLED;
         }
+
         trailCubes.Clear();
 
         if (CheckEmptyTileLeft())
         {
             OnLevelComplete.Raise();
+            
+            allGrids = null;
+            totalGridCount = 0;
         }
     }
 }

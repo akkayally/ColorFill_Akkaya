@@ -18,6 +18,25 @@ public class EnemyController : MonoBehaviour
 
     private float minPosition, maxPosition;
 
+
+    private void OnEnable()
+    {
+        GameManager.Instance.OnGameStateChange.AddListener(HandleGameStateChanged);
+    }
+
+    private void OnDisable()
+    {
+        GameManager.Instance.OnGameStateChange.RemoveListener(HandleGameStateChanged);
+    }
+
+    private void HandleGameStateChanged(GameManager.GameState currentState, GameManager.GameState prevState)
+    { 
+        if(prevState == GameManager.GameState.PLAYING && currentState == GameManager.GameState.GAME_OVER)
+        {
+            isMoving = false;
+        }
+    }
+    
     private void Awake()
     {
         SetValues();

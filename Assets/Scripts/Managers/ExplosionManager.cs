@@ -47,15 +47,7 @@ public class ExplosionManager : MonoSingleton<ExplosionManager>
         return newEnemyVFX;
     }
 
-    public void SpawnEnemyVfxAtPosition(Vector3 spawnPos)
-    {
-        GameObject enemyVFX = GetEnemyVFX();
-        enemyVFX.transform.position = spawnPos;
-
-        StartCoroutine(EnemyParticleHandler(enemyVFX));        
-    }
-
-    private IEnumerator EnemyParticleHandler(GameObject particleVFX)
+    private IEnumerator ParticleHandler(GameObject particleVFX)
     {
         ParticleSystem _particle = particleVFX.GetComponentInChildren<ParticleSystem>();
         if (_particle != null)
@@ -67,4 +59,23 @@ public class ExplosionManager : MonoSingleton<ExplosionManager>
 
         _particle.Stop();
     }
+
+    public void SpawnPlayerVfxAtPosition(Vector3 spawnPos)
+    {
+        GameObject playerVFX = Instantiate(playerExplosionPrefab, playerVFXContainer.transform);
+
+        playerVFX.transform.position = spawnPos;
+
+        StartCoroutine(ParticleHandler(playerVFX));
+    }
+
+    public void SpawnEnemyVfxAtPosition(Vector3 spawnPos)
+    {
+        GameObject enemyVFX = GetEnemyVFX();
+        enemyVFX.transform.position = spawnPos;
+
+        StartCoroutine(ParticleHandler(enemyVFX));        
+    }
+
+
 }

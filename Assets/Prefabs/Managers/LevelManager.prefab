@@ -75,13 +75,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 016ba9dec098d85498b87f577634028a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wallLeft: {fileID: 4608057658723579738, guid: 7a4053e3f970a1c45bde9319bc879110, type: 3}
-  wallRight: {fileID: 695276312653679015, guid: 04a78f7f8bb5120438e4f9fc87a459a4, type: 3}
-  wallTop: {fileID: 2428500834915022563, guid: a720346110f74bb418ba244c193f3ed2, type: 3}
-  wallBottom: {fileID: 1990326872110271985, guid: 305a43a7267c220469bd0046b29f9a46, type: 3}
+  wallLeftPrefab: {fileID: 4608057658723579738, guid: 7a4053e3f970a1c45bde9319bc879110, type: 3}
+  wallRightPrefab: {fileID: 695276312653679015, guid: 04a78f7f8bb5120438e4f9fc87a459a4, type: 3}
+  wallTopPrefab: {fileID: 2428500834915022563, guid: a720346110f74bb418ba244c193f3ed2, type: 3}
+  wallBottomPrefab: {fileID: 1990326872110271985, guid: 305a43a7267c220469bd0046b29f9a46, type: 3}
   wallsContainer: {fileID: 6120664779610328701}
   obstacleContainer: {fileID: 605570598690506078}
-  level: {fileID: 0}
 --- !u!1 &6120664779610328701
 GameObject:
   m_ObjectHideFlags: 0

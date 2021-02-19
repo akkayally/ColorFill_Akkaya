@@ -65,6 +65,9 @@ public class FillManager : MonoSingleton<FillManager>
                 }
             }
         }
+
+        GridManager.Instance.EmptyTileGroup(fillCoordinates); //Resetting tile statuses back to empty
+
         return fillCoordinates;
     }
 
@@ -79,7 +82,7 @@ public class FillManager : MonoSingleton<FillManager>
             {
                 int _xCoordinate = (int)xzCoordinate.x;
                 int _zCoordinate = (int)xzCoordinate.y;
-                GridManager.Instance.CreateTrailAtPosition(_xCoordinate, _zCoordinate);
+                GridManager.Instance.CreateTrailAtPosition(_xCoordinate, _zCoordinate, false);
             }
         }
         
@@ -118,8 +121,8 @@ public class FillManager : MonoSingleton<FillManager>
             {
                 if(GridManager.Instance.IsTileEmpty(xCoord, zCoord + 1) && GridManager.Instance.IsTileEmpty(xCoord, zCoord - 1))
                 {
-                    neighboursAtSides.Add(new Vector2(xCoord, zCoord + 1));
                     neighboursAtSides.Add(new Vector2(xCoord, zCoord - 1));
+                    neighboursAtSides.Add(new Vector2(xCoord, zCoord + 1));
                 }
             }
         }
@@ -139,29 +142,44 @@ public class FillManager : MonoSingleton<FillManager>
 
         if(tileGroup1.Count > 0 && tileGroup2.Count > 0)
         {
-            if(tileGroup1.Count == tileGroup2.Count)
+            if(tileGroup1.Count < tileGroup2.Count)
             {
                 AddToFillCoordinates(tileGroup1);
             }
-            else if(tileGroup1.Count < tileGroup2.Count)
-            {
-                AddToFillCoordinates(tileGroup1);
-            }
-            else
+            else if(tileGroup2.Count < tileGroup1.Count)
             {
                 AddToFillCoordinates(tileGroup2);
             }
-
-            //Checking if any empty tile left apart from the tiles in the two tile group selected
-            if(GridManager.Instance.GetEmptyTilesCoordinates().Count > 0)
+            else if(AreTwoAreasDifferent(tileGroup1, tileGroup2))
             {
-                AddToFillCoordinates(GridManager.Instance.GetEmptyTilesCoordinates());
+                AddToFillCoordinates(tileGroup1);
             }
-
-            GridManager.Instance.EmptyTileGroup(tileGroup1); //Resetting tile statuses to empty before actually filling it
-            GridManager.Instance.EmptyTileGroup(tileGroup2); //Resetting tile statuses to empty before actually filling it
         }
     }
+
+
+    /// <summary>
+    /// Checking if two groups of tiles has the same tile
+    /// </summary>
+    /// <param name="tileGroupA">Tile area on the left/bottom of a trail cube</param>
+    /// <param name="tileGroupB">Tile area on the right/top of a trail cube</param>
+    /// <returns></returns>
+    private bool AreTwoAreasDifferent(List<Vector2> tileGroupA, List<Vector2> tileGroupB)
+    {
+        foreach(Vector2 _vectorA in tileGroupA)
+        {
+            foreach(Vector2 _vectorB in tileGroupB)
+            {
+                if(_vectorA == _vectorB)
+                {
+                    return false; //Two area sharing a tile, so there are no boundary between two!
+                }
+            }
+        }
+
+        return true; //two area are separated by a boundary
+    }
+
 
     /// <summary>
     /// Adds each tile's xz coordinates to list

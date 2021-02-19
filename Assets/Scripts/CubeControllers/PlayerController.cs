@@ -25,19 +25,57 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
-        InputManager.Instance.OnSwipe += HandleSwipe;
-        LevelManager.Instance.OnLevelCreated += AdjustInitialPosition;
         playerRb = GetComponent<Rigidbody>();
+        GameManager.Instance.OnGameStateChange.AddListener(HandleGameStateChanged);
+        InputManager.Instance.OnSwipe += HandleSwipe;
+        LevelManager.Instance.OnLevelCreated += AdjustInitialPosition;        
     }
 
     private void OnDisable()
     {
+        GameManager.Instance.OnGameStateChange.RemoveListener(HandleGameStateChanged);
         LevelManager.Instance.OnLevelCreated -= AdjustInitialPosition;
         InputManager.Instance.OnSwipe -= HandleSwipe;        
     }
 
+    private void HandleGameStateChanged(GameManager.GameState currentState, GameManager.GameState prevState)
+    {
+        if(prevState == GameManager.GameState.PLAYING && currentState == GameManager.GameState.GAME_OVER)
+        {
+            StopMovement();
+        }
+        else if (prevState == GameManager.GameState.GAME_OVER && currentState == GameManager.GameState.MENU)
+        {
+            ResetParemeters();
+        }
+        else if(prevState == GameManager.GameState.PLAYING && currentState == GameManager.GameState.MENU)
+        {
+            StartCoroutine(ResetParametersWithDelay());
+        }
+
+    }
+
+    private IEnumerator ResetParametersWithDelay()
+    {
+        yield return new WaitForSeconds(2.5f);
+        ResetParemeters();
+    }
+        
+
+    private void ResetParemeters()
+    {
+        movementVector = Vector3.zero;
+        movementDirection = Directions.NULL;
+        xCoord = 0;
+        zCoord = 0;
+        trailPositionDirection.Clear();
+        isPlayerOnEmptyTile = false;
+        transform.position = new Vector3(5f, 0.5f, 0f);
+    }
+
     private void AdjustInitialPosition(Vector2 gridSize, List<Vector2> obstacleCoordiantes)
     {
+        StopMovement();
         float _xPosition = ((int)gridSize.x - 1) / 2;
 
         transform.position = new Vector3(_xPosition, 0.5f, 0f);
@@ -116,11 +154,6 @@ public class PlayerController : MonoBehaviour
         {
             FillArea();
         }
-        else if (other.CompareTag("Obstacle"))
-        {
-            StopMovement();
-            GridManager.Instance.MoveTrailCubesUp();
-        }
     }
     #endregion
 
@@ -177,7 +210,7 @@ public class PlayerController : MonoBehaviour
 
     private void TryCreatingTrailCube()
     {
-        if (GridManager.Instance.CreateTrailAtPosition(xCoord, zCoord))
+        if (GridManager.Instance.CreateTrailAtPosition(xCoord, zCoord, true))
         {
             isPlayerOnEmptyTile = true;
             trailPositionDirection.Add(new Vector2(xCoord, zCoord), movementDirection);

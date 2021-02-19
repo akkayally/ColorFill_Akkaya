@@ -11,6 +11,7 @@ public class EnemyCube : MonoBehaviour
     {
         if (other.CompareTag("Player") || other.CompareTag("Trail"))
         {
+            ExplosionManager.Instance.SpawnPlayerVfxAtPosition(transform.position);
             OnGameOver.Raise();
         }
         else if (other.CompareTag("Filled"))

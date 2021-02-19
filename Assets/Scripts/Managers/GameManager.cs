@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,6 +16,25 @@ public class GameManager : MonoSingleton<GameManager>
 
     [SerializeField] GameState _currentGameState;
 
+    private void OnEnable()
+    {
+        LevelManager.Instance.OnLevelCreated += HandleLevelStart;
+    }
+    private void OnDisable()
+    {
+        LevelManager.Instance.OnLevelCreated -= HandleLevelStart;
+    }
+
+    private void HandleLevelStart(Vector2 gridSize, List<Vector2> obstaclePositions)
+    {
+        UpdateState(GameState.PLAYING);
+    }
+
+    private void Start()
+    {
+        UpdateState(GameState.MENU);
+    }
+
     private void UpdateState(GameState state)
     {
         GameState previousGameState = _currentGameState;
@@ -25,10 +45,8 @@ public class GameManager : MonoSingleton<GameManager>
             case GameState.MENU:
                 break;
             case GameState.PLAYING:
-                Time.timeScale = 1;
                 break;
             case GameState.GAME_OVER:
-                Time.timeScale = 0;
                 break;
             default:
                 break;
@@ -46,4 +64,15 @@ public class GameManager : MonoSingleton<GameManager>
     {
         UpdateState(GameState.GAME_OVER);
     }
+
+    public void MainMenu()
+    {
+        UpdateState(GameState.MENU);
+    }
+
+    public void LevelCompleted()
+    {
+        UpdateState(GameState.MENU);
+    }
+
 }
