@@ -40,18 +40,28 @@ public class LevelManager : MonoSingleton<LevelManager>
         }
     }
 
+    /// <summary>
+    /// Reset current level with a little delay
+    /// </summary>
     private IEnumerator ResetLevelWithDelay()
     {
         yield return new WaitForSeconds(2.5f);
         ResetLevel();
     }
 
+    /// <summary>
+    /// Destroy walls, enemies and obstacles in a level if one exists
+    /// </summary>
     private void ResetLevel()
     {        
         DestroyWalls();
         DestroyEnemy();
         DestroyObstacles();
     }
+
+    /// <summary>
+    /// Destroys each wall
+    /// </summary>
     private void DestroyWalls()
     {
         Destroy(wallLeft);
@@ -60,12 +70,19 @@ public class LevelManager : MonoSingleton<LevelManager>
         Destroy(wallBottom);
     }
 
+
+    /// <summary>
+    /// Destroy if an enemy exists on a level
+    /// </summary>
     private void DestroyEnemy()
     {
         if(enemy != null)
             Destroy(enemy);
     }
 
+    /// <summary>
+    /// Destroys obstacles if any exists
+    /// </summary>
     private void DestroyObstacles()
     {
        if(obstacles != null)
@@ -103,6 +120,12 @@ public class LevelManager : MonoSingleton<LevelManager>
         enemy = Instantiate(enemyPrefab, _spawnPos, Quaternion.identity);
     }
 
+
+    /// <summary>
+    /// Creates obstacles at given XZ coordinates
+    /// </summary>
+    /// <param name="obstaclePrefab">Prefab to create an obstacle from</param>
+    /// <param name="obstaclePositions">List of XZ coordniates of obstacles in a level</param>
     private void CreateObstacles(GameObject obstaclePrefab, List<Vector2> obstaclePositions)
     {
         obstacles = new List<GameObject>();
@@ -115,6 +138,10 @@ public class LevelManager : MonoSingleton<LevelManager>
     }
 
     #region Public Methods
+    /// <summary>
+    /// Generates a level based on given level settings
+    /// </summary>
+    /// <param name="levelSettings">Scriptable object holds the details of a game level</param>
     public void GenerateLevel(LevelSettings levelSettings)
     {
         int columnCount = levelSettings.GridSettings.ColumnSize;

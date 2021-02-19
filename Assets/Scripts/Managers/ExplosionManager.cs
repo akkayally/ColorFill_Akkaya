@@ -18,6 +18,9 @@ public class ExplosionManager : MonoSingleton<ExplosionManager>
         GenerateEnemyVFXPool();
     }
 
+    /// <summary>
+    /// Creates a pool for enemy particle effects
+    /// </summary>
     private void GenerateEnemyVFXPool()
     {
         enemyExplosionPool = new List<GameObject>();
@@ -31,6 +34,11 @@ public class ExplosionManager : MonoSingleton<ExplosionManager>
     }
 
 
+    /// <summary>
+    /// Gets an available enemy explosion fx from the pool
+    /// If no available vfx found pops one
+    /// </summary>
+    /// <returns>Particle system for enemy explosion</returns>
     private GameObject GetEnemyVFX()
     {
         foreach (var enemyVFX in enemyExplosionPool)
@@ -47,6 +55,10 @@ public class ExplosionManager : MonoSingleton<ExplosionManager>
         return newEnemyVFX;
     }
 
+    /// <summary>
+    /// Gets a game object, finds the particle system in its children and if found plays it
+    /// </summary>
+    /// <param name="particleVFX">Game object with particle VFX in its child</param>
     private IEnumerator ParticleHandler(GameObject particleVFX)
     {
         ParticleSystem _particle = particleVFX.GetComponentInChildren<ParticleSystem>();
@@ -60,6 +72,10 @@ public class ExplosionManager : MonoSingleton<ExplosionManager>
         _particle.Stop();
     }
 
+    /// <summary>
+    /// Create a player particle fx in a given position
+    /// </summary>
+    /// <param name="spawnPos">Player's position</param>
     public void SpawnPlayerVfxAtPosition(Vector3 spawnPos)
     {
         GameObject playerVFX = Instantiate(playerExplosionPrefab, playerVFXContainer.transform);
@@ -69,6 +85,10 @@ public class ExplosionManager : MonoSingleton<ExplosionManager>
         StartCoroutine(ParticleHandler(playerVFX));
     }
 
+    /// <summary>
+    /// Gets an enemy explosion fx from the pool and plays it in the given position
+    /// </summary>
+    /// <param name="spawnPos">Position to spawn enemy particle effect</param>
     public void SpawnEnemyVfxAtPosition(Vector3 spawnPos)
     {
         GameObject enemyVFX = GetEnemyVFX();

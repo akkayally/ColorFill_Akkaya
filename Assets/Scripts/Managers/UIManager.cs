@@ -27,6 +27,12 @@ public class UIManager : MonoBehaviour
         gameOverPanel.SetActive(false);
     }
 
+    /// <summary>
+    /// Listens GameManager for a possible game state change
+    /// Arranges visibility of UI elements based on a state change
+    /// </summary>
+    /// <param name="currentState">Previous state of the game</param>
+    /// <param name="prevState">Current state of the game</param>
     private void HandleGameStateChanged(GameManager.GameState currentState, GameManager.GameState prevState)
     {
         if(prevState == GameManager.GameState.MENU && currentState == GameManager.GameState.PLAYING)
@@ -48,6 +54,9 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Showing menu panel with a little delay
+    /// </summary>
     private IEnumerator ShowMenuWithDelay()
     {
         yield return new WaitForSeconds(2.5f);

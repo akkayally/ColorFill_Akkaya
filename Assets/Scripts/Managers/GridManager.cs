@@ -26,6 +26,11 @@ public class GridManager : MonoSingleton<GridManager>
         GameManager.Instance.OnGameStateChange.RemoveListener(HandleGameStateChanged);
     }
 
+    /// <summary>
+    /// Sets the grid's column and row counts when a level is created
+    /// </summary>
+    /// <param name="_gridSize">Number of columns and rows in the loaded level</param>
+    /// <param name="obstacleCoordinates">List of XZ Coordinates of obstacle in the loaded level</param>
     private void SetGridSize(Vector2 _gridSize, List<Vector2> obstacleCoordinates)
     {
         columnSize = (int)_gridSize.x;
@@ -46,6 +51,10 @@ public class GridManager : MonoSingleton<GridManager>
         }
     }
 
+    /// <summary>
+    /// Creates an obstacle at each position in a given list of XZ coordinates
+    /// </summary>
+    /// <param name="obstacleCoordinates">XZ Coordinates of obstacles in a level</param>
     private void SetObstaclePositions(List<Vector2> obstacleCoordinates)
     {
         foreach(Vector2 xzCoordinates in obstacleCoordinates)
@@ -57,6 +66,10 @@ public class GridManager : MonoSingleton<GridManager>
         }
     }
 
+    /// <summary>
+    /// Goes through all tiles in the grid and sums the number of filled ones
+    /// </summary>
+    /// <returns>Number of filled tiles</returns>
     private int GetFilledGridCount()
     {
         int fillCount = 0;
@@ -70,6 +83,11 @@ public class GridManager : MonoSingleton<GridManager>
         return fillCount;
     }
 
+    /// <summary>
+    /// Based on the column and row counts creates a grid
+    /// </summary>
+    /// <param name="columnSize">Number of columns</param>
+    /// <param name="rowSize">Number of rows</param>
     public void GenerateGrid(int columnSize, int rowSize)
     {
         allGrids = new GridStatus[columnSize, rowSize];
@@ -83,6 +101,13 @@ public class GridManager : MonoSingleton<GridManager>
         }
     }
 
+    /// <summary>
+    /// Creates a trail cube at a given XZ coordinates if the tile is empty
+    /// </summary>
+    /// <param name="xCoord">Column index of a tile</param>
+    /// <param name="zCoord">Row index of a tile</param>
+    /// <param name="isTrail">If the created cube is a trail cube or a filled one</param>
+    /// <returns>If a tile is created at the given position or not</returns>
     public bool CreateTrailAtPosition(int xCoord, int zCoord, bool isTrail)
     {
         if (allGrids[xCoord, zCoord] == GridStatus.EMPTY)
@@ -97,11 +122,21 @@ public class GridManager : MonoSingleton<GridManager>
         return false;
     }
 
+    /// <summary>
+    /// Checks if a tile on a given XZ coordinate is empty
+    /// </summary>
+    /// <param name="xCoordinate">Column index of a tile</param>
+    /// <param name="zCoordinate">Row index of a tile</param>
+    /// <returns></returns>
     public bool IsTileEmpty(int xCoordinate, int zCoordinate)
     {
         return allGrids[xCoordinate, zCoordinate] == GridStatus.EMPTY;
     }
 
+    /// <summary>
+    /// Gets coordinates of each empty tile on the grid
+    /// </summary>
+    /// <returns></returns>
     public List<Vector2> GetEmptyTilesCoordinates()
     {
         List<Vector2> emptyTiles = new List<Vector2>();
@@ -117,6 +152,10 @@ public class GridManager : MonoSingleton<GridManager>
         return emptyTiles;
     }
 
+    /// <summary>
+    /// Sets the statuses of each tile in the group to empty 
+    /// </summary>
+    /// <param name="tileGroup">A group of tiles</param>
     public void EmptyTileGroup(List<Vector2> tileGroup)
     {
         foreach(Vector2 tilePos in tileGroup)
@@ -133,6 +172,10 @@ public class GridManager : MonoSingleton<GridManager>
         return GetFilledGridCount() == totalGridCount;
     }
 
+
+    /// <summary>
+    /// Move all trail cubes up to fill an area
+    /// </summary>
     public void MoveTrailCubesUp()
     {
         foreach(GameObject trailCube in trailCubes)

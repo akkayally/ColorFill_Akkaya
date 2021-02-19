@@ -42,14 +42,18 @@ public class EnemyController : MonoBehaviour
         SetValues();
     }
 
+    /// <summary>
+    /// Sets parameter values based on enemy settings
+    /// </summary>
     private void SetValues()
     {
-        if (enemySettings.MovementDirection != MovementAxis.NaN) //if the enemy is set to move
+        if (enemySettings.MovementDirection != MovementAxis.NaN) //if enemy has direction
         {
             isMoving = true;
             movementAxis = enemySettings.MovementDirection;
             moveSpeed = enemySettings.MoveSpeed;
             moveDistance = enemySettings.MoveDistance;
+
             if(movementAxis == MovementAxis.HORIZONTAL)
             {
                 minPosition = transform.position.x - moveDistance;
@@ -81,6 +85,9 @@ public class EnemyController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles horizontal movement of the enemy group
+    /// </summary>
     private void MoveHorizontally()
     {
         if (dirFirst)
@@ -101,13 +108,17 @@ public class EnemyController : MonoBehaviour
             dirFirst = true;
         }
     }
+
+    /// <summary>
+    /// Handles the vertical movement of the enemy group
+    /// </summary>
     private void MoveVertically()
     {
-        if (dirFirst)
+        if (dirFirst) //Moves the enemy group upwards
         {
             transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
         }
-        else
+        else //moves the enemy group downwards
         {
             transform.Translate(Vector3.back * moveSpeed * Time.deltaTime);
         }

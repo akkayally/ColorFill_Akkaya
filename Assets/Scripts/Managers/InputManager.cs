@@ -77,7 +77,7 @@ public class InputManager : MonoSingleton<InputManager>
     /// </summary>
     private void CheckSwipe()
     {
-        //Check if Vertical swipe
+        //Checks if Vertical swipe
         if (VerticalMove() > SWIPE_THRESHOLD && VerticalMove() > HorizontalMove())
         {
             if (touchStartPosition.y - touchEndPosition.y > 0)
@@ -90,7 +90,7 @@ public class InputManager : MonoSingleton<InputManager>
             }
             touchEndPosition = touchStartPosition;
         }
-        //Check if Horizontal swipe
+        //Checks if Horizontal swipe
         else if (HorizontalMove() > SWIPE_THRESHOLD && HorizontalMove() > VerticalMove())
         {
             if (touchStartPosition.x - touchEndPosition.x > 0)
@@ -111,18 +111,18 @@ public class InputManager : MonoSingleton<InputManager>
     }
 
     /// <summary>
-    /// Checks if user movement is vertical
+    /// Calculates vertical displacement
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Vertical displacement</returns>
     float VerticalMove()
     {
         return Mathf.Abs(touchEndPosition.y - touchStartPosition.y);
     }
 
     /// <summary>
-    /// Checks if user movement is horizontal
+    /// Calculates horizontal displacement
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Horizontal displacement</returns>
     float HorizontalMove()
     {
         return Mathf.Abs(touchEndPosition.x - touchStartPosition.x);

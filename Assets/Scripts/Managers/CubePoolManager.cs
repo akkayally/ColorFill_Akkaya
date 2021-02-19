@@ -17,11 +17,14 @@ public class CubePoolManager : MonoSingleton<CubePoolManager>
         GenerateTrailCubePool();
     }
 
+    /// <summary>
+    /// Creates 50 trail cubes, disables it in the game scene and adds them to the pool
+    /// </summary>
     private void GenerateTrailCubePool()
     {
         _trailPool = new List<GameObject>();
 
-        for(int i= 0; i< 25; i++)
+        for(int i= 0; i< 50; i++)
         {
             GameObject trailCube = Instantiate(trailPrefab,Vector3.zero, Quaternion.identity, _cubesContainer.transform);
             trailCube.SetActive(false);
@@ -29,6 +32,12 @@ public class CubePoolManager : MonoSingleton<CubePoolManager>
         }
     }
 
+
+    /// <summary>
+    /// Return an available cube from the pool
+    /// If no available cube is found pops a new cube
+    /// </summary>
+    /// <returns>Trail cube</returns>
     public GameObject RequestTrailCube()
     {
         foreach(var trail in _trailPool)

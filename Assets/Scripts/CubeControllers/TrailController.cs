@@ -13,6 +13,7 @@ public class TrailController : MonoBehaviour
     {
         GameManager.Instance.OnGameStateChange.RemoveListener(HandleGameStateChanged);
     }
+
     private void Start()
     {
         AdjustPosition();
@@ -30,13 +31,19 @@ public class TrailController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Push the cube to GridPool manager with a little delay
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator DestoryCubeWithDelay()
     {
         yield return new WaitForSeconds(2.5f);
         gameObject.SetActive(false);
     }
 
-
+    /// <summary>
+    /// When created snaps the cube to the nearest grid
+    /// </summary>
     private void AdjustPosition()
     {
         transform.position = new Vector3(Mathf.RoundToInt(transform.position.x), transform.position.y, Mathf.RoundToInt(transform.position.z));

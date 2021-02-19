@@ -61,7 +61,9 @@ public class PlayerController : MonoBehaviour
         ResetParemeters();
     }
         
-
+    /// <summary>
+    /// Reset values of all parameters
+    /// </summary>
     private void ResetParemeters()
     {
         movementVector = Vector3.zero;
@@ -73,6 +75,10 @@ public class PlayerController : MonoBehaviour
         transform.position = new Vector3(5f, 0.5f, 0f);
     }
 
+    /// <summary>
+    /// Positions the player cube when a level is created
+    /// </summary>
+    /// <param name="gridSize">Loaded level's grid dimension</param>
     private void AdjustInitialPosition(Vector2 gridSize, List<Vector2> obstacleCoordiantes)
     {
         StopMovement();
@@ -84,6 +90,13 @@ public class PlayerController : MonoBehaviour
         gridRowCount = (int)gridSize.y;
     }
 
+
+    /// <summary>
+    /// On user input first snaps the player on the nearest grid
+    /// Sets relevant parameters  for track mechanics
+    /// Sets the movement direction according to user input and starts movement
+    /// </summary>
+    /// <param name="_direction"></param>
     private void HandleSwipe(Directions _direction)
     {
         AdjustPosition();
@@ -99,6 +112,10 @@ public class PlayerController : MonoBehaviour
         transform.position = new Vector3(Mathf.RoundToInt(transform.position.x), transform.position.y, Mathf.RoundToInt(transform.position.z));
     }
 
+
+    /// <summary>
+    /// Sets xCoord and zCoord parameters based on player's current position
+    /// </summary>
     private void SetXZCoordinates()
     {
         xCoord = Mathf.RoundToInt(transform.position.x);
@@ -150,7 +167,7 @@ public class PlayerController : MonoBehaviour
             StopMovement();
             FillArea();
         }
-        else if (other.CompareTag("Filled") && isPlayerOnEmptyTile) //Player moves from empty tile to filled one
+        else if (other.CompareTag("Filled") && isPlayerOnEmptyTile) //Player moves from an empty tile to filled one
         {
             FillArea();
         }
@@ -208,6 +225,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Tries to create a trail cube if player is on an empty tile
+    /// </summary>
     private void TryCreatingTrailCube()
     {
         if (GridManager.Instance.CreateTrailAtPosition(xCoord, zCoord, true))
@@ -217,6 +237,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Fills the area when player hits a filled tile or a wall/obstacle
+    /// </summary>
     private void FillArea()
     {
         SetXZCoordinates();
@@ -231,7 +254,9 @@ public class PlayerController : MonoBehaviour
         movementDirection = Directions.NULL;
     }
 
-
+    /// <summary>
+    /// Stops cube movement
+    /// </summary>
     private void StopMovement()
     {
         AdjustPosition();
@@ -239,6 +264,10 @@ public class PlayerController : MonoBehaviour
         playerRb.velocity = Vector3.zero;
     }
 
+
+    /// <summary>
+    /// Handle animation with delays when a level completed.
+    /// </summary>
     private IEnumerator LevelEndAnimation()
     {
         transform.DOMoveX((gridColumnCount - 1) / 2, 1f);
@@ -247,6 +276,9 @@ public class PlayerController : MonoBehaviour
         transform.DOMoveZ(gridRowCount + 2f, 1f);
     }
 
+    /// <summary>
+    /// When a level completed stops player movement then play level ending animation
+    /// </summary>
     public void HandleLevelComplete()
     {
         StopMovement();

@@ -16,6 +16,10 @@ public class FillManager : MonoSingleton<FillManager>
         LevelManager.Instance.OnLevelCreated += SetGridData;
     }
 
+    /// <summary>
+    /// When a level created gets it data and assign column and row values based on it
+    /// </summary>
+    /// <param name="gridSize">Current level's column and row sizes</param>
     private void SetGridData(Vector2 gridSize, List<Vector2> obstacleCoordiantes)
     {
         gridColumSize = (int)gridSize.x;
@@ -104,9 +108,9 @@ public class FillManager : MonoSingleton<FillManager>
         int xCoord = (int)xzCoord.x;
         int zCoord = (int)xzCoord.y;
 
-        if (moveDirection == Directions.UP || moveDirection == Directions.DOWN)
+        if (moveDirection == Directions.UP || moveDirection == Directions.DOWN) //Vertical movement
         {
-            if(xzCoord.x > 0 && xzCoord.x < gridColumSize - 1)
+            if(xzCoord.x > 0 && xzCoord.x < gridColumSize - 1)//Checking if the given coordinates is within the boundaries of the current level
             {
                 if(GridManager.Instance.IsTileEmpty(xCoord -1, zCoord) && GridManager.Instance.IsTileEmpty(xCoord + 1, zCoord))
                 {
@@ -115,9 +119,9 @@ public class FillManager : MonoSingleton<FillManager>
                 }
             }
         }
-        else
+        else //Horizontal movement
         {
-            if(xzCoord.y > 0 && xzCoord.y < gridRowSize - 1)
+            if(xzCoord.y > 0 && xzCoord.y < gridRowSize - 1)//Checking if the given coordinates is within the boundaries of the current level
             {
                 if(GridManager.Instance.IsTileEmpty(xCoord, zCoord + 1) && GridManager.Instance.IsTileEmpty(xCoord, zCoord - 1))
                 {
