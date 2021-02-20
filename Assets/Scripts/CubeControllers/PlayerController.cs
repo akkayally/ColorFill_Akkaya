@@ -248,10 +248,8 @@ public class PlayerController : MonoBehaviour
         {
             FillManager.Instance.FillTiles(trailPositionDirection);
         }
-
-        isPlayerOnEmptyTile = false;
-        trailPositionDirection.Clear();
-        movementDirection = Directions.NULL;
+               
+        trailPositionDirection.Clear();        
     }
 
     /// <summary>
@@ -262,6 +260,9 @@ public class PlayerController : MonoBehaviour
         AdjustPosition();
         isMoving = false;
         playerRb.velocity = Vector3.zero;
+
+        isPlayerOnEmptyTile = false;
+        movementDirection = Directions.NULL;
     }
 
 
